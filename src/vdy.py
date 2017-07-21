@@ -63,17 +63,20 @@ class vdy:
         else: pass
  
     def referVari(self, value):
-        r, v = self.referVariOnly(value)
-        if r: return v
-        else: return self.referVariStr(value)
+        value = self.referVariOnly(value)
+        if type(value) is str: return self.referVariStr(value)
+        else: return value
 
     def referVariOnly(self, value):
         m = re.search(self.REG_VARIABLE_ONLY, value.strip())
-        if m:
-            if self.variDoc.get(m.group(1), None) != None:
-                return True, self.variDoc[m.group(1)]
-            else: return False, value
-        else: return False, value
+        while m:
+            if m.group(1) in self.variDoc.keys():
+                value = self.variDoc[m.group(1)]
+                if type(value) is str:
+                    m = re.search(self.REG_VARIABLE_ONLY, value.strip())
+                else: m = False
+            else: m = False
+        return value
 
     def referVariStr(self, value):
         newValue = value
