@@ -1,23 +1,23 @@
 # ---- Methods ----
-method_Post: '"POST"'
-method_Delete: '"DELETE"'
-method_Get: '"GET"'
-method_Put: '"PUT"'
+method_Post: POST
+method_Delete: DELETE
+method_Get: GET
+method_Put: PUT
 
 # ---- Header ----
-header_ContentType: "'Content-Type'"
-header_ContentType_Value: "'application/json'"
-header_ContentType_Message_Value: "'application/json'"
-header_ContentLength: "'content-length'"
-header_ContentLength_Value: '0'
-header_Server: "'server'"
-header_Server_Value: "'Werkzeug/0.11.11 Python/2.7.13'"
-header_Date: "'date'"
-header_Date_Value: "'^(Mon|Tue|Wed|Thu|Fri|Sat|Sun),\\s\\d\\d\\s(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\\s\\d{4}\\s\\d\\d:\\d\\d:\\d\\d\\sGMT$-'"
-header_Accept: "'Accept'"
-header_Accept_Value: "'application/json'"
-header_AcceptEncoding: "'Accept-Encoding'"
-header_AcceptEncoding_Value: "'gzip, deflate'"
+header_ContentType: Content-Type
+header_ContentType_Value: application/json
+header_ContentType_Message_Value: application/json
+header_ContentLength: content-length
+header_ContentLength_Value: 0
+header_Server: server
+header_Server_Value: Werkzeug/0.11.11 Python/2.7.13
+header_Date: date
+header_Date_Value: ^(Mon|Tue|Wed|Thu|Fri|Sat|Sun),\\s\\d\\d\\s(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\\s\\d{4}\\s\\d\\d:\\d\\d:\\d\\d\\sGMT$
+header_Accept: Accept
+header_Accept_Value: application/json
+header_AcceptEncoding: Accept-Encoding
+header_AcceptEncoding_Value: gzip, deflate
 headers_Post: "{$header_ContentType:$header_ContentType_Value, $header_Accept:$header_Accept_Value, $header_AcceptEncoding:$header_AcceptEncoding_Value}"
 headers_Delete: "{$header_Accept:$header_Accept_Value}"
 headers_empty_body: "{$header_Accept:$header_Accept_Value, $header_AcceptEncoding:$header_AcceptEncoding_Value}"
