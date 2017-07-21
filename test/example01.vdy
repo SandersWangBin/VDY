@@ -1,71 +1,39 @@
-VARIABLES:
+# ---- Methods ----
+method_Post: '"POST"'
+method_Delete: '"DELETE"'
+method_Get: '"GET"'
+method_Put: '"PUT"'
 
-    # ---- Methods ----
-    method_Post: '"POST"'
-    method_Delete: '"DELETE"'
-    method_Get: '"GET"'
-    method_Put: '"PUT"'
+# ---- Header ----
+header_ContentType: "'Content-Type'"
+header_ContentType_Value: "'application/json'"
+header_ContentType_Message_Value: "'application/json'"
+header_ContentLength: "'content-length'"
+header_ContentLength_Value: '0'
+header_Server: "'server'"
+header_Server_Value: "'Werkzeug/0.11.11 Python/2.7.13'"
+header_Date: "'date'"
+header_Date_Value: "'^(Mon|Tue|Wed|Thu|Fri|Sat|Sun),\\s\\d\\d\\s(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\\s\\d{4}\\s\\d\\d:\\d\\d:\\d\\d\\sGMT$-'"
+header_Accept: "'Accept'"
+header_Accept_Value: "'application/json'"
+header_AcceptEncoding: "'Accept-Encoding'"
+header_AcceptEncoding_Value: "'gzip, deflate'"
+headers_Post: "{$header_ContentType:$header_ContentType_Value, $header_Accept:$header_Accept_Value, $header_AcceptEncoding:$header_AcceptEncoding_Value}"
+headers_Delete: "{$header_Accept:$header_Accept_Value}"
+headers_empty_body: "{$header_Accept:$header_Accept_Value, $header_AcceptEncoding:$header_AcceptEncoding_Value}"
 
-    # ---- Header ----
-    header_ContentType: "'Content-Type'"
-    header_ContentType_Value: "'application/json'"
-    header_ContentType_Message_Value: "'application/json'"
-    header_ContentLength: "'content-length'"
-    header_ContentLength_Value: '0'
-    header_Server: "'server'"
-    header_Server_Value: "'Werkzeug/0.11.11 Python/2.7.13'"
-    header_Date: "'date'"
-    header_Date_Value: "'^(Mon|Tue|Wed|Thu|Fri|Sat|Sun),\\s\\d\\d\\s(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\\s\\d{4}\\s\\d\\d:\\d\\d:\\d\\d\\sGMT$-'"
-    header_Accept: "'Accept'"
-    header_Accept_Value: "'application/json'"
-    header_AcceptEncoding: "'Accept-Encoding'"
-    header_AcceptEncoding_Value: "'gzip, deflate'"
-    headers_Post: "{$header_ContentType:$header_ContentType_Value, $header_Accept:$header_Accept_Value, $header_AcceptEncoding:$header_AcceptEncoding_Value}"
-    headers_Delete: "{$header_Accept:$header_Accept_Value}"
-#NOTE get "Malformed content" if defining Content-Type in GET the header if the body is empty
-    headers_empty_body: "{$header_Accept:$header_Accept_Value, $header_AcceptEncoding:$header_AcceptEncoding_Value}"
-
-    # ---- Return codes ----
-    expected_Status_200: '[200]'
-    expected_Status_201: '[201]'
-    expected_Status_400: '[400]'
-    expected_Status_404: '[404]'
-    expected_Status_409: '[409]'
-    expected_Status_Post: '$expected_Status_201'
-    expected_Status_Delete: '$expected_Status_200'
-    expected_Status_Get: '$expected_Status_200'
-    expected_Status_Put: '$expected_Status_200'
+# ---- Return codes ----
+expected_Status_200: 200
+expected_Status_201: 201
+expected_Status_400: 400
+expected_Status_404: 404
+expected_Status_409: 409
+expected_Status_Post: [$expected_Status_201]
+expected_Status_Delete: [$expected_Status_200]
+expected_Status_Get: [$expected_Status_200]
+expected_Status_Put: [$expected_Status_200]
 
 
-    # ---- Validators ----
+# ---- Validators ----
 
-    #TODO why is this needed? Is it not possible to do a regexp match during validation?
-    common_Newline: '\n'
-    common_Indent:  '    '
-    common_Indent2: '        '
 
-    validators_indent: '$common_Newline$common_Indent2-'
-    validators_Compare: '$validators_indent compare: '
-    validators_Json_Schema: '$validators_indent json_schema: '
-
-    # ---- Validators/header ----
-    validators_Compare_Header_ContentType: "$validators_Compare{header: $header_ContentType, comparator: 'str_eq', expected: $header_ContentType_Message_Value}"
-    validators_Compare_Header_ContentLength: "$validators_Compare{header: $header_ContentLength, comparator: 'eq', expected: '$header_ContentLength_Value'}"
-    validators_Compare_Header_Server: "$validators_Compare{header: $header_Server, comparator: 'str_eq', expected: $header_Server_Value}"
-    validators_Compare_Header_Date: "$validators_Compare{header: $header_Date, comparator: 'regex', expected: $header_Date_Value}"
-    validators_Compare_Header: "$validators_Compare_Header_ContentType$validators_Compare_Header_ContentLength$validators_Compare_Header_Server$validators_Compare_Header_Date"
-
-    # ---- Validators/message ----
-    validators_expected_raw_body_contents: '"[]"'
-    validators_Compare_Json_raw_body: "$validators_Compare{raw_body: '', comparator: 'str_eq', expected: $validators_expected_raw_body_contents}"
-
-    # ---- Validators/message body ----
-    validators_Compare_Json_schemas_empty: '$validators_Compare_Json_raw_body'
-    validators_Compare_Json_schemas: '$validators_Compare_Json_schemas_empty'
-
-    # ---- Validators/message schema validation ----
-#TODO schema validation
-#    requires the 'jsonschema' python module to be installed
-#    sudo apt-get install python-jsonschema
-#    should already be in vas.sh!
-    validators_json_schema_location: '../raml/schema'
