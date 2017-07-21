@@ -12,12 +12,20 @@ class vdy:
     TYPE_VALUE = 'VALUE'
     TYPE_NONE = 'NONE'
 
+    KEYWORD_IMPORT = 'IMPORT'
+
     def __init__(self, vdyFileName):
         self.vdyFileName = vdyFileName
-        self.yamlDoc = self.importYaml(vdyFileName)
+        self.yamlDoc = dict()
         self.variDoc = dict()
-        self.handleValue(None, self.TYPE_NONE, None, self.yamlDoc, self.generateVariDoc, self.dummy)
-        self.handleValue(None, self.TYPE_NONE, None, self.yamlDoc, self.referVariDoc, self.dummy)
+        self.yamlDoc.update(self.handleDoc(vdyFileName))
+
+    def handleDoc(self, fileName):
+        origDoc = self.importYaml(fileName)
+        for f in origDoc.get(self.KEYWORD_IMPORT, []): origDoc.update(self.handleDoc(f))
+        self.handleValue(None, self.TYPE_NONE, None, origDoc, self.generateVariDoc, self.dummy)
+        self.handleValue(None, self.TYPE_NONE, None, origDoc, self.referVariDoc, self.dummy)
+        return origDoc
 
     def importYaml(self, yamlName):
         with open(yamlName, 'r') as f: doc = yaml.safe_load(f.read())
