@@ -5,6 +5,7 @@ import re
 
 class vdy:
     REG_VARIABLE = r'\$[a-zA-Z0-9_]+'
+    REG_VARIABLE_ONLY = r'^\$([a-zA-Z0-9_]+)$'
 
     TYPE_DICT = 'DICT'
     TYPE_LIST = 'LIST'
@@ -54,7 +55,19 @@ class vdy:
         else: pass
  
     def referVari(self, value):
-        if self.variDoc.get(value, None) != None: return self.variDoc[value]
+        r, v = self.referVariOnly(value)
+        if r: return v
+        else: return self.referVariStr(value)
+
+    def referVariOnly(self, value):
+        m = re.search(self.REG_VARIABLE_ONLY, value.strip())
+        if m:
+            if self.variDoc.get(m.group(1), None) != None:
+                return True, self.variDoc[m.group(1)]
+            else: return False, value
+        else: return False, value
+
+    def referVariStr(self, value):
         newValue = value
         while re.search(self.REG_VARIABLE, newValue):
             s, e = [(m.start(), m.end()) for m in re.finditer(self.REG_VARIABLE, newValue)][0]
