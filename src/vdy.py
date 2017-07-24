@@ -2,6 +2,7 @@
 
 import yaml
 import re
+import copy
 
 class vdy:
     REG_VARIABLE = r'\$[a-zA-Z0-9_]+'
@@ -14,16 +15,17 @@ class vdy:
 
     KEYWORD_IMPORT = 'IMPORT'
 
-    def __init__(self, vdyFileName):
+    def __init__(self, vdyFileName=None):
         self.vdyFileName = vdyFileName
         self.yamlDoc = dict()
         self.variDoc = dict()
-        if type(vdyFileName) is str: self.yamlDoc.update(self.handleDoc(vdyFileName))
-        elif type(vdyFileName) is list:
-            for f in vdyFileName:
-                self.yamlDoc.update(self.handleDoc(f))
-        else: pass
-        self.handleValue(None, self.TYPE_NONE, None, self.yamlDoc, self.referVariDoc, self.dummy)
+        if vdyFileName != None:
+            if type(vdyFileName) is str: self.yamlDoc.update(self.handleDoc(vdyFileName))
+            elif type(vdyFileName) is list:
+                for f in vdyFileName:
+                    self.yamlDoc.update(self.handleDoc(f))
+            else: pass
+            #self.handleValue(None, self.TYPE_NONE, None, self.yamlDoc, self.referVariDoc, self.dummy)
 
     def handleDoc(self, fileName):
         origDoc = self.importYaml(fileName)
@@ -86,7 +88,9 @@ class vdy:
                 value = self.variDoc[m.group(1)]
                 if type(value) is str:
                     m = re.search(self.REG_VARIABLE_ONLY, value.strip())
-                else: m = False
+                else:
+                    #self.handleValue(None, self.TYPE_NONE, None, value, self.referVariDoc, self.dummy)
+                    m = False
             else: m = False
         return value
 
@@ -99,9 +103,30 @@ class vdy:
 
     def dummy(self, point, ptype, key, value): pass
 
-    def assign(self, variable):
-        self.handleValue(None, self.TYPE_NONE, None, variable, self.referVariDoc, self.dummy)
-        return variable
+    def assign(self, variable=None):
+        if variable != None:
+            self.handleValue(None, self.TYPE_NONE, None, variable, self.referVariDoc, self.dummy)
+            return variable
+        else:
+            self.handleValue(None, self.TYPE_NONE, None, self.yamlDoc, self.referVariDoc, self.dummy)
+            return self.yamlDoc
+
+    def clone(self, other):
+        self.vdyFileName = str(other.vdyFileName)
+        self.yamlDoc = copy.deepcopy(other.yamlDoc)
+        self.variDoc = copy.deepcopy(other.variDoc)
+        return self
+
+    def join(self, variable):
+        if type(variable) is dict:
+            self.yamlDoc.update(variable)
+            self.handleValue(None, self.TYPE_NONE, None, self.yamlDoc, self.generateVariDoc, self.dummy)
+            #self.handleValue(None, self.TYPE_NONE, None, self.yamlDoc, self.referVariDoc, self.dummy)
+        return self
+
+    def clearVariDoc(self):
+        self.variDoc.clear()
+        return self
 
     def __str__(self):
         return str(self.yamlDoc)
