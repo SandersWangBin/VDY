@@ -59,9 +59,16 @@ class vdy:
         if type(value) is dict: pass
         elif type(value) is list: pass
         elif type(value) is str:
-            point[key] = self.referVari(value)
+            newValue = self.referVari(value)
+            if type(key) is str:
+                newKey = self.referVari(key)
+                if newKey != key:
+                    del point[key]
+                    point[newKey] = newValue
+                else: point[key] = newValue
+            else: point[key] = newValue
         else: pass
- 
+
     def referVari(self, value):
         value = self.referVariOnly(value)
         if type(value) is str: return self.referVariStr(value)
