@@ -24,7 +24,7 @@ class vdy:
         origDoc = self.importYaml(fileName)
         for f in origDoc.get(self.KEYWORD_IMPORT, []): origDoc.update(self.handleDoc(f))
         self.handleValue(None, self.TYPE_NONE, None, origDoc, self.generateVariDoc, self.dummy)
-        self.handleValue(None, self.TYPE_NONE, None, origDoc, self.referVariDoc, self.dummy)
+        #self.handleValue(None, self.TYPE_NONE, None, origDoc, self.referVariDoc, self.dummy)
         return origDoc
 
     def importYaml(self, yamlName):
@@ -93,6 +93,10 @@ class vdy:
         return newValue
 
     def dummy(self, point, ptype, key, value): pass
+
+    def assign(self, variable):
+        self.handleValue(None, self.TYPE_NONE, None, variable, self.referVariDoc, self.dummy)
+        return variable
 
     def __str__(self):
         return str(self.yamlDoc)
