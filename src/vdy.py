@@ -18,7 +18,12 @@ class vdy:
         self.vdyFileName = vdyFileName
         self.yamlDoc = dict()
         self.variDoc = dict()
-        self.yamlDoc.update(self.handleDoc(vdyFileName))
+        if type(vdyFileName) is str: self.yamlDoc.update(self.handleDoc(vdyFileName))
+        elif type(vdyFileName) is list:
+            for f in vdyFileName:
+                self.yamlDoc.update(self.handleDoc(f))
+        else: pass
+        self.handleValue(None, self.TYPE_NONE, None, self.yamlDoc, self.referVariDoc, self.dummy)
 
     def handleDoc(self, fileName):
         origDoc = self.importYaml(fileName)
@@ -89,7 +94,7 @@ class vdy:
         newValue = value
         while re.search(self.REG_VARIABLE, newValue):
             s, e = [(m.start(), m.end()) for m in re.finditer(self.REG_VARIABLE, newValue)][0]
-            newValue = newValue[:s] + str(self.variDoc[newValue[s+1:e]]) + newValue[e:]
+            newValue = newValue[:s] + str(self.variDoc.get(newValue[s+1:e], newValue[s+1:e])) + newValue[e:]
         return newValue
 
     def dummy(self, point, ptype, key, value): pass
