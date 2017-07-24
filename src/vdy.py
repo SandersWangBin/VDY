@@ -89,7 +89,7 @@ class vdy:
         newValue = value
         while re.search(self.REG_VARIABLE, newValue):
             s, e = [(m.start(), m.end()) for m in re.finditer(self.REG_VARIABLE, newValue)][0]
-            newValue = newValue[:s] + self.variDoc[newValue[s+1:e]] + newValue[e:]
+            newValue = newValue[:s] + str(self.variDoc[newValue[s+1:e]]) + newValue[e:]
         return newValue
 
     def dummy(self, point, ptype, key, value): pass
