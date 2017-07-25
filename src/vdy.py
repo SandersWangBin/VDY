@@ -8,6 +8,8 @@ class vdy:
     REG_VARIABLE = r'\$[a-zA-Z0-9_]+'
     REG_VARIABLE_ONLY = r'^\$([a-zA-Z0-9_]+)$'
 
+    SYMBOL_SLASH = '/'
+
     TYPE_DICT = 'DICT'
     TYPE_LIST = 'LIST'
     TYPE_VALUE = 'VALUE'
@@ -29,10 +31,14 @@ class vdy:
 
     def handleDoc(self, fileName):
         origDoc = self.importYaml(fileName)
-        for f in origDoc.get(self.KEYWORD_IMPORT, []): origDoc.update(self.handleDoc(f))
+        origPath = self.getPath(fileName)
+        for f in origDoc.get(self.KEYWORD_IMPORT, []): origDoc.update(self.handleDoc(origPath+f))
         self.handleValue(None, self.TYPE_NONE, None, origDoc, self.generateVariDoc, self.dummy)
         #self.handleValue(None, self.TYPE_NONE, None, origDoc, self.referVariDoc, self.dummy)
         return origDoc
+
+    def getPath(self, fileName):
+        return  self.SYMBOL_SLASH.join(fileName.split(self.SYMBOL_SLASH)[0:-1]) + self.SYMBOL_SLASH
 
     def importYaml(self, yamlName):
         with open(yamlName, 'r') as f: doc = yaml.safe_load(f.read())
