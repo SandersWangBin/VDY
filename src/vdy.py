@@ -5,8 +5,8 @@ import re
 import copy
 
 class vdy:
-    REG_VARIABLE = r'\$[a-zA-Z0-9_]+'
-    REG_VARIABLE_ONLY = r'^\$([a-zA-Z0-9_]+)$'
+    REG_VARIABLE = r'\$[a-zA-Z0-9_\.]+'
+    REG_VARIABLE_ONLY = r'^\$([a-zA-Z0-9_\.]+)$'
 
     SYMBOL_SLASH = '/'
 
@@ -27,14 +27,15 @@ class vdy:
                 for f in vdyFileName:
                     self.yamlDoc.update(self.handleDoc(f))
             else: pass
-            #self.handleValue(None, self.TYPE_NONE, None, self.yamlDoc, self.referVariDoc, self.dummy)
+            #self.handleValue(None, self.TYPE_NONE, None, self.yamlDoc, '', self.referVariDoc, self.dummy)
 
     def handleDoc(self, fileName):
         origDoc = self.importYaml(fileName)
         origPath = self.getPath(fileName)
         for f in origDoc.get(self.KEYWORD_IMPORT, []): origDoc.update(self.handleDoc(origPath+f))
-        self.handleValue(None, self.TYPE_NONE, None, origDoc, self.generateVariDoc, self.dummy)
-        #self.handleValue(None, self.TYPE_NONE, None, origDoc, self.referVariDoc, self.dummy)
+        self.handleValue(None, self.TYPE_NONE, None, origDoc, '', self.generateVariDoc, self.dummy)
+        self.handleValue(None, self.TYPE_NONE, None, origDoc, '', self.referVariKey, self.dummy)
+        #self.handleValue(None, self.TYPE_NONE, None, origDoc, '', self.referVariDoc, self.dummy)
         return origDoc
 
     def getPath(self, fileName):
@@ -44,31 +45,41 @@ class vdy:
         with open(yamlName, 'r') as f: doc = yaml.safe_load(f.read())
         return doc
 
-    def handleValue(self, p, t, k, v, b, a):
-        if type(v) is dict: self.walkDict(p, t, k, v, b, a)
-        elif type(v) is list: self.walkList(p, t, k, v, b, a)
-        else: self.walkValue(p, t, k, v, b, a)
+    def updateContext(self, k, c):
+        return c + str(k) if len(c)==0 else c + '.' + str(k)
 
-    def walkDict(self, point, ptype, key, value, prefunc, postfunc):
+    def handleValue(self, p, t, k, v, c, b, a):
+        if type(v) is dict: self.walkDict(p, t, k, v, c, b, a)
+        elif type(v) is list: self.walkList(p, t, k, v, c, b, a)
+        else: self.walkValue(p, t, k, v, c, b, a)
+
+    def walkDict(self, point, ptype, key, value, context, prefunc, postfunc):
         for k, v in value.iteritems():
-            prefunc(point, ptype, key, value)
-            self.handleValue(value, self.TYPE_DICT, k, v, prefunc, postfunc)
-            postfunc(point, ptype, key, value)
+            prefunc(point, ptype, key, value, context)
+            self.handleValue(value, self.TYPE_DICT, k, v, self.updateContext(k, context), prefunc, postfunc)
+            postfunc(point, ptype, key, context, value)
 
-    def walkList(self, point, ptype, key, value, prefunc, postfunc):
+    def walkList(self, point, ptype, key, value, context, prefunc, postfunc):
         for k in range(len(value)):
-            prefunc(point, ptype, key, value)
-            self.handleValue(value, self.TYPE_LIST, k, value[k], prefunc, postfunc)
-            postfunc(point, ptype, key, value)
+            prefunc(point, ptype, key, value, context)
+            self.handleValue(value, self.TYPE_LIST, k, value[k], self.updateContext(k, context), prefunc, postfunc)
+            postfunc(point, ptype, key, value, context)
 
-    def walkValue(self, point, ptype, key, value, prefunc, postfunc):
-        prefunc(point, ptype, key, value)
-        postfunc(point, ptype, key, value)
+    def walkValue(self, point, ptype, key, value, context, prefunc, postfunc):
+        prefunc(point, ptype, key, value, context)
+        postfunc(point, ptype, key, value, context)
 
-    def generateVariDoc(self, point, ptype, key, value):
-        if ptype == self.TYPE_DICT: self.variDoc[key] = value
+    def generateVariDoc(self, point, ptype, key, value, context):
+        if ptype == self.TYPE_DICT:
+            self.variDoc[context] = value
 
-    def referVariDoc(self, point, ptype, key, value):
+    def referVariKey(self, point, ptype, key, value, context):
+        if type(key) is str:
+            newKey = self.referVari(key)
+            if newKey != key:
+                self.variDoc[context.replace(key, newKey)] = self.variDoc[context]
+
+    def referVariDoc(self, point, ptype, key, value, context):
         if type(value) is dict: pass
         elif type(value) is list: pass
         elif type(value) is str:
@@ -76,6 +87,7 @@ class vdy:
             if type(key) is str:
                 newKey = self.referVari(key)
                 if newKey != key:
+                    self.variDoc[context.replace(key, newKey)] = self.variDoc[context]
                     del point[key]
                     point[newKey] = newValue
                 else: point[key] = newValue
@@ -95,7 +107,7 @@ class vdy:
                 if type(value) is str:
                     m = re.search(self.REG_VARIABLE_ONLY, value.strip())
                 else:
-                    #self.handleValue(None, self.TYPE_NONE, None, value, self.referVariDoc, self.dummy)
+                    #self.handleValue(None, self.TYPE_NONE, None, value, <context>, self.referVariDoc, self.dummy)
                     m = False
             else: m = False
         return value
@@ -107,14 +119,14 @@ class vdy:
             newValue = newValue[:s] + str(self.variDoc.get(newValue[s+1:e], newValue[s+1:e])) + newValue[e:]
         return newValue
 
-    def dummy(self, point, ptype, key, value): pass
+    def dummy(self, point, ptype, key, value, context): pass
 
     def assign(self, variable=None):
         if variable != None:
-            self.handleValue(None, self.TYPE_NONE, None, variable, self.referVariDoc, self.dummy)
+            self.handleValue(None, self.TYPE_NONE, None, variable, '', self.referVariDoc, self.dummy)
             return variable
         else:
-            self.handleValue(None, self.TYPE_NONE, None, self.yamlDoc, self.referVariDoc, self.dummy)
+            self.handleValue(None, self.TYPE_NONE, None, self.yamlDoc, '', self.referVariDoc, self.dummy)
             return self.yamlDoc
 
     def clone(self, other):
@@ -126,8 +138,9 @@ class vdy:
     def join(self, variable):
         if type(variable) is dict:
             self.yamlDoc.update(variable)
-            self.handleValue(None, self.TYPE_NONE, None, self.yamlDoc, self.generateVariDoc, self.dummy)
-            #self.handleValue(None, self.TYPE_NONE, None, self.yamlDoc, self.referVariDoc, self.dummy)
+            self.handleValue(None, self.TYPE_NONE, None, self.yamlDoc, '', self.generateVariDoc, self.dummy)
+            self.handleValue(None, self.TYPE_NONE, None, self.yamlDoc, '', self.referVariKey, self.dummy)
+            #self.handleValue(None, self.TYPE_NONE, None, self.yamlDoc, '', self.referVariDoc, self.dummy)
         return self
 
     def clearVariDoc(self):
@@ -135,4 +148,4 @@ class vdy:
         return self
 
     def __str__(self):
-        return str(self.yamlDoc)
+        return str(self.yamlDoc) + '\n' + str(self.variDoc)
