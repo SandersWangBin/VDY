@@ -34,7 +34,7 @@ class vdy:
         origPath = self.getPath(fileName)
         for f in origDoc.get(self.KEYWORD_IMPORT, []): origDoc.update(self.handleDoc(origPath+f))
         self.handleValue(None, self.TYPE_NONE, None, origDoc, '', self.generateVariDoc, self.dummy)
-        self.handleValue(None, self.TYPE_NONE, None, origDoc, '', self.referVariKey, self.dummy)
+        #self.handleValue(None, self.TYPE_NONE, None, origDoc, '', self.referVariKey, self.dummy)
         #self.handleValue(None, self.TYPE_NONE, None, origDoc, '', self.referVariDoc, self.dummy)
         return origDoc
 
@@ -122,6 +122,7 @@ class vdy:
     def dummy(self, point, ptype, key, value, context): pass
 
     def assign(self, variable=None):
+        self.handleValue(None, self.TYPE_NONE, None, self.yamlDoc, '', self.referVariKey, self.dummy)
         if variable != None:
             self.handleValue(None, self.TYPE_NONE, None, variable, '', self.referVariDoc, self.dummy)
             return variable
@@ -138,8 +139,9 @@ class vdy:
     def join(self, variable):
         if type(variable) is dict:
             self.yamlDoc.update(variable)
+            self.variDoc = dict()
             self.handleValue(None, self.TYPE_NONE, None, self.yamlDoc, '', self.generateVariDoc, self.dummy)
-            self.handleValue(None, self.TYPE_NONE, None, self.yamlDoc, '', self.referVariKey, self.dummy)
+            #self.handleValue(None, self.TYPE_NONE, None, self.yamlDoc, '', self.referVariKey, self.dummy)
             #self.handleValue(None, self.TYPE_NONE, None, self.yamlDoc, '', self.referVariDoc, self.dummy)
         return self
 
