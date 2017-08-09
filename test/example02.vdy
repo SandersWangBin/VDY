@@ -1,0 +1,14 @@
+value_1: official value 1
+key_str_2: key_2
+element_1_dic: { key_1: $value_1, $key_str_2: 'value 2'}
+element_2_dic: { key_1: 'the value in element_2_dic.key_1', key_2: 'the value in element_2_dic.key_2'}
+
+str_1: $element_1_dic.key_1
+str_2: $element_2_dic.key_2
+str_3: $element_1_dic.key_2
+
+element_3_list:
+    - {list_key: 'list value 0'}
+    - {list_key: 'list value 1'}
+
+str_4: $element_3_list.0.list_key

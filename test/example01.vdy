@@ -18,9 +18,9 @@ header_Accept: Accept
 header_Accept_Value: application/json
 header_AcceptEncoding: Accept-Encoding
 header_AcceptEncoding_Value: gzip, deflate
-headers_Post: "{$header_ContentType:$header_ContentType_Value, $header_Accept:$header_Accept_Value, $header_AcceptEncoding:$header_AcceptEncoding_Value}"
-headers_Delete: "{$header_Accept:$header_Accept_Value}"
-headers_empty_body: "{$header_Accept:$header_Accept_Value, $header_AcceptEncoding:$header_AcceptEncoding_Value}"
+headers_Post: {"$header_ContentType":"$header_ContentType_Value", "$header_Accept":"$header_Accept_Value", "$header_AcceptEncoding":"$header_AcceptEncoding_Value"}
+headers_Delete: {"$header_Accept":"$header_Accept_Value"}
+headers_empty_body: {"$header_Accept":"$header_Accept_Value", "$header_AcceptEncoding":"$header_AcceptEncoding_Value"}
 
 # ---- Return codes ----
 expected_Status_200: 200
@@ -35,5 +35,6 @@ expected_Status_Put: [$expected_Status_200]
 
 
 # ---- Validators ----
+
 
 
