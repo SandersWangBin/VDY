@@ -5,9 +5,6 @@ import re
 import copy
 
 class vdy:
-    REG_VARIABLE = r'\$[a-zA-Z0-9_\.]+'
-    REG_VARIABLE_ONLY = r'^\$([a-zA-Z0-9_\.]+)$'
-
     SYMBOL_SLASH = '/'
 
     TYPE_DICT = 'DICT'
@@ -18,16 +15,13 @@ class vdy:
     KEYWORD_IMPORT = 'IMPORT'
 
     def __init__(self, vdyFileName=None):
+        self.REG_VARIABLE = r'\$[a-zA-Z0-9_\.]+'
+        self.REG_VARIABLE_ONLY = r'^\$([a-zA-Z0-9_\.]+)$'
+
         self.vdyFileName = vdyFileName
         self.yamlDoc = dict()
         self.variDoc = dict()
-        if vdyFileName != None:
-            if type(vdyFileName) is str: self.yamlDoc.update(self.handleDoc(vdyFileName))
-            elif type(vdyFileName) is list:
-                for f in vdyFileName:
-                    self.yamlDoc.update(self.handleDoc(f))
-            else: pass
-            #self.handleValue(None, self.TYPE_NONE, None, self.yamlDoc, '', self.referVariDoc, self.dummy)
+        self.updateYamlDoc(vdyFileName)
 
     def handleDoc(self, fileName):
         origDoc = self.importYaml(fileName)
@@ -137,12 +131,24 @@ class vdy:
         return self
 
     def join(self, variable):
-        if type(variable) is dict:
-            self.yamlDoc.update(variable)
-            self.variDoc = dict()
-            self.handleValue(None, self.TYPE_NONE, None, self.yamlDoc, '', self.generateVariDoc, self.dummy)
-            #self.handleValue(None, self.TYPE_NONE, None, self.yamlDoc, '', self.referVariKey, self.dummy)
-            #self.handleValue(None, self.TYPE_NONE, None, self.yamlDoc, '', self.referVariDoc, self.dummy)
+        self.updateYamlDoc(variable)
+        self.updateVariDoc()
+        return self
+
+    def updateYamlDoc(self, doc):
+        if doc == None: return self
+        if type(doc) is str: self.yamlDoc.update(self.handleDoc(doc))
+        elif type(doc) is list:
+            for f in doc: self.yamlDoc.update(self.handleDoc(f))
+        elif type(doc) is dict:
+            self.yamlDoc.update(doc)
+        else:
+            pass
+        return self
+
+    def updateVariDoc(self):
+        self.clearVariDoc()
+        self.handleValue(None, self.TYPE_NONE, None, self.yamlDoc, '', self.generateVariDoc, self.dummy)
         return self
 
     def clearVariDoc(self):
